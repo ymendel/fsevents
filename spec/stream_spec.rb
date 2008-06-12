@@ -145,6 +145,40 @@ describe FSEvents::Stream do
       end
     end
   end
+  
+  it 'should schedule itself'
+  
+  describe 'when scheduling' do
+    it 'should schedule the stream'
+    it 'should pass the stream'
+    it "should use the 'get current' run loop"
+    it 'should use the default mode'
+  end
+  
+  it 'should start itself'
+  
+  describe 'when starting' do
+    it 'should start the stream'
+  end
+  
+  it 'should stop itself'
+  
+  describe 'when stopping' do
+    it 'should stop the stream'
+  end
+  
+  it 'should invalidate itself'
+  
+  describe 'when invalidating' do
+    it 'should invalidate the stream'
+  end
+  
+  it 'should release itself'
+  
+  describe 'when releasing' do
+    it 'should release the stream'
+    it 'should clear the stream'
+  end
 end
 
 describe FSEvents::Stream::StreamError do
