@@ -16,5 +16,9 @@ module FSEvents
       @stream = OSX.FSEventStreamCreate(allocator, callback, context, path, since, latency, flags)
       raise StreamError, 'Unable to create FSEvents stream.' unless @stream
     end
+    
+    def schedule
+      OSX.FSEventStreamScheduleWithRunLoop(stream, OSX.CFRunLoopGetCurrent, OSX::KCFRunLoopDefaultMode)
+    end
   end
 end

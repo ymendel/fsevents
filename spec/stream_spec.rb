@@ -1,6 +1,14 @@
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe FSEvents::Stream do
+  before :each do
+    @path = "/tmp"
+    stream = stub('stream')
+    OSX.stubs(:FSEventStreamCreate).returns(stream)
+    
+    @stream = FSEvents::Stream.new(@path)
+  end
+  
   describe 'when initialized' do
     before :each do
       @stream = stub('stream')
@@ -146,13 +154,44 @@ describe FSEvents::Stream do
     end
   end
   
-  it 'should schedule itself'
+  it 'should schedule itself' do
+    @stream.should respond_to(:schedule)
+  end
   
   describe 'when scheduling' do
-    it 'should schedule the stream'
-    it 'should pass the stream'
-    it "should use the 'get current' run loop"
-    it 'should use the default mode'
+    before :each do
+      OSX.stubs(:FSEventStreamScheduleWithRunLoop)
+    end
+    
+    it 'should schedule the stream' do
+      OSX.expects(:FSEventStreamScheduleWithRunLoop)
+      @stream.schedule
+    end
+    
+    it 'should pass the stream' do
+      OSX.expects(:FSEventStreamScheduleWithRunLoop).with(@stream.stream, anything, anything)
+      @stream.schedule
+    end
+    
+    it "should use the 'get current' run loop" do
+      OSX.expects(:CFRunLoopGetCurrent)
+      @stream.schedule
+    end
+    
+    it "should pass the 'get current' run loop" do
+      pending 'figuring out how to test this well'
+      # CFRunLoopGetCurrent returns a different value every time it's called, so it's like testing Time.now
+      # The trouble is that while doing something like @now = Time.now; Time.stubs(:now).returns(@now) works, 
+      # the same sort of shenanigans with OSX.CFRunLoopGetCurrent caused problems for me, including the error message
+      # Cannot convert the passed-by-reference argument #0 as '{__FSEventStream=}' to Ruby
+      OSX.expects(:FSEventStreamScheduleWithRunLoop).with(anything, OSX.CFRunLoopGetCurrent, anything)
+      @stream.schedule
+    end
+    
+    it 'should use the default mode' do
+      OSX.expects(:FSEventStreamScheduleWithRunLoop).with(anything, anything, OSX::KCFRunLoopDefaultMode)
+      @stream.schedule
+    end
   end
   
   it 'should start itself'
