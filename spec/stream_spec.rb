@@ -272,6 +272,27 @@ describe FSEvents::Stream do
       @stream.shutdown
     end
   end
+  
+  it 'should start up' do
+    @stream.should respond_to(:startup)
+  end
+  
+  describe 'when starting up' do
+    before :each do
+      @stream.stubs(:schedule)
+      @stream.stubs(:start)
+    end
+    
+    it 'should schedule' do
+      @stream.expects(:schedule)
+      @stream.startup
+    end
+    
+    it 'should start' do
+      @stream.expects(:start)
+      @stream.startup
+    end
+  end
 end
 
 describe FSEvents::Stream::StreamError do

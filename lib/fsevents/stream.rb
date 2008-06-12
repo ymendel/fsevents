@@ -25,6 +25,11 @@ module FSEvents
       OSX.FSEventStreamStart(stream)
     end
     
+    def startup
+      schedule
+      start
+    end
+    
     def stop
       OSX.FSEventStreamStop(stream)
     end
