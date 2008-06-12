@@ -25,13 +25,66 @@ describe FSEvents::Stream do
     end
     
     describe 'when creating the stream' do
-      it 'should pass the allocator'
-      it 'should pass the callback'
-      it 'should pass the context'
-      it 'should pass the path'
-      it 'should pass the since'
-      it 'should pass the latency'
-      it 'should pass the flags'
+      before :each do
+        @options = {}
+        [:allocator, :callback, :context, :path, :since, :latency, :flags].each do |opt|
+          val = stub(opt.to_s)
+          
+          instance_variable_set("@#{opt}", val)
+          @options[opt] = val
+        end
+        
+        @arg_placeholders = Array.new(7) { anything }
+      end
+      
+      it 'should pass the allocator' do
+        args = @arg_placeholders
+        args[0] = @allocator
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the callback' do
+        args = @arg_placeholders
+        args[1] = @callback
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the context' do
+        args = @arg_placeholders
+        args[2] = @context
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the path' do
+        args = @arg_placeholders
+        args[3] = @path
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the since (event ID)' do
+        args = @arg_placeholders
+        args[4] = @since
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the latency' do
+        args = @arg_placeholders
+        args[5] = @latency
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the flags' do
+        args = @arg_placeholders
+        args[6] = @flags
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
       
       it 'should default the allocator to KCFAllocatorDefault'  # OSX::KCFAllocatorDefault
       # it 'should default the callback' # files changed
