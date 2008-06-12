@@ -245,6 +245,33 @@ describe FSEvents::Stream do
       @stream.stream.should be_nil
     end
   end
+  
+  it 'should shut down' do
+    @stream.should respond_to(:shutdown)
+  end
+  
+  describe 'when shutting down' do
+    before :each do
+      @stream.stubs(:stop)
+      @stream.stubs(:invalidate)
+      @stream.stubs(:release)
+    end
+    
+    it 'should stop' do
+      @stream.expects(:stop)
+      @stream.shutdown
+    end
+    
+    it 'should invalidate' do
+      @stream.expects(:invalidate)
+      @stream.shutdown
+    end
+    
+    it 'should release' do
+      @stream.expects(:release)
+      @stream.shutdown
+    end
+  end
 end
 
 describe FSEvents::Stream::StreamError do

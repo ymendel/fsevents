@@ -37,5 +37,11 @@ module FSEvents
       OSX.FSEventStreamRelease(stream)
       @stream = nil
     end
+    
+    def shutdown
+      stop
+      invalidate
+      release
+    end
   end
 end
