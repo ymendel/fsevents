@@ -130,7 +130,11 @@ describe FSEvents::Stream do
         FSEvents::Stream.new(@path, @options)
       end
       
-      it 'should store the stream'
+      it 'should store the stream' do
+        stream = stub('stream')
+        OSX.stubs(:FSEventStreamCreate).returns(stream)
+        FSEvents::Stream.new(@path, @options).stream.should == stream
+      end
     end
   end
 end
