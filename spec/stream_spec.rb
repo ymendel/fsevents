@@ -27,7 +27,7 @@ describe FSEvents::Stream do
     describe 'when creating the stream' do
       before :each do
         @options = {}
-        [:allocator, :callback, :context, :path, :since, :latency, :flags].each do |opt|
+        [:allocator, :callback, :context, :since, :latency, :flags].each do |opt|
           val = stub(opt.to_s)
           
           instance_variable_set("@#{opt}", val)
@@ -58,9 +58,9 @@ describe FSEvents::Stream do
         FSEvents::Stream.new(@path, @options)
       end
       
-      it 'should pass the path' do
+      it 'should pass the path as an array' do
         args = @arg_placeholders
-        args[3] = @path
+        args[3] = [@path]
         OSX.expects(:FSEventStreamCreate).with(*args)
         FSEvents::Stream.new(@path, @options)
       end
