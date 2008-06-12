@@ -194,29 +194,57 @@ describe FSEvents::Stream do
     end
   end
   
-  it 'should start itself'
+  it 'should start itself' do
+    @stream.should respond_to(:start)
+  end
   
   describe 'when starting' do
-    it 'should start the stream'
+    it 'should start the stream' do
+      OSX.expects(:FSEventStreamStart).with(@stream.stream)
+      @stream.start
+    end
   end
   
-  it 'should stop itself'
+  it 'should stop itself' do
+    @stream.should respond_to(:stop)
+  end
   
   describe 'when stopping' do
-    it 'should stop the stream'
+    it 'should stop the stream' do
+      OSX.expects(:FSEventStreamStop).with(@stream.stream)
+      @stream.stop
+    end
   end
   
-  it 'should invalidate itself'
+  it 'should invalidate itself' do
+    @stream.should respond_to(:invalidate)
+  end
   
   describe 'when invalidating' do
-    it 'should invalidate the stream'
+    it 'should invalidate the stream' do
+      OSX.expects(:FSEventStreamInvalidate).with(@stream.stream)
+      @stream.invalidate
+    end
   end
   
-  it 'should release itself'
+  it 'should release itself' do
+    @stream.should respond_to(:release)
+  end
   
   describe 'when releasing' do
-    it 'should release the stream'
-    it 'should clear the stream'
+    before :each do
+      OSX.stubs(:FSEventStreamRelease)
+    end
+    
+    it 'should release the stream' do
+      OSX.expects(:FSEventStreamRelease).with(@stream.stream)
+      @stream.release
+    end
+    
+    it 'should clear the stream' do
+      @stream.release
+      @stream.stream.should be_nil
+    end
   end
 end
 

@@ -20,5 +20,22 @@ module FSEvents
     def schedule
       OSX.FSEventStreamScheduleWithRunLoop(stream, OSX.CFRunLoopGetCurrent, OSX::KCFRunLoopDefaultMode)
     end
+    
+    def start
+      OSX.FSEventStreamStart(stream)
+    end
+    
+    def stop
+      OSX.FSEventStreamStop(stream)
+    end
+    
+    def invalidate
+      OSX.FSEventStreamInvalidate(stream)
+    end
+    
+    def release
+      OSX.FSEventStreamRelease(stream)
+      @stream = nil
+    end
   end
 end
