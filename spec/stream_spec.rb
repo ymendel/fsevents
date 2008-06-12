@@ -3,8 +3,9 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 describe FSEvents::Stream do
   describe 'when initialized' do
     before :each do
+      @stream = stub('stream')
       @path = '/tmp'
-      OSX.stubs(:FSEventStreamCreate)
+      OSX.stubs(:FSEventStreamCreate).returns(@stream)
     end
     
     it 'should accept a path' do
@@ -20,7 +21,7 @@ describe FSEvents::Stream do
     end
     
     it 'should create a new stream' do
-      OSX.expects(:FSEventStreamCreate)
+      OSX.expects(:FSEventStreamCreate).returns(@stream)
       FSEvents::Stream.new(@path)
     end
     
@@ -40,49 +41,49 @@ describe FSEvents::Stream do
       it 'should pass the allocator' do
         args = @arg_placeholders
         args[0] = @allocator
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should pass the callback' do
         args = @arg_placeholders
         args[1] = @callback
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should pass the context' do
         args = @arg_placeholders
         args[2] = @context
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should pass the path as an array' do
         args = @arg_placeholders
         args[3] = [@path]
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should pass the since (event ID)' do
         args = @arg_placeholders
         args[4] = @since
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should pass the latency' do
         args = @arg_placeholders
         args[5] = @latency
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should pass the flags' do
         args = @arg_placeholders
         args[6] = @flags
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
@@ -90,7 +91,7 @@ describe FSEvents::Stream do
         @options.delete(:allocator)
         args = @arg_placeholders
         args[0] = OSX::KCFAllocatorDefault
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
@@ -100,7 +101,7 @@ describe FSEvents::Stream do
         @options.delete(:context)
         args = @arg_placeholders
         args[2] = nil
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
@@ -110,7 +111,7 @@ describe FSEvents::Stream do
         @options.delete(:since)
         args = @arg_placeholders
         args[4] = OSX::KFSEventStreamEventIdSinceNow
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
@@ -118,7 +119,7 @@ describe FSEvents::Stream do
         @options.delete(:latency)
         args = @arg_placeholders
         args[5] = 1.0
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
@@ -126,15 +127,28 @@ describe FSEvents::Stream do
         @options.delete(:flags)
         args = @arg_placeholders
         args[6] = 0
-        OSX.expects(:FSEventStreamCreate).with(*args)
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
       end
       
       it 'should store the stream' do
-        stream = stub('stream')
-        OSX.stubs(:FSEventStreamCreate).returns(stream)
-        FSEvents::Stream.new(@path, @options).stream.should == stream
+        FSEvents::Stream.new(@path, @options).stream.should == @stream
+      end
+      
+      it 'should raise a StreamError exception if the stream could not be created' do
+        OSX.stubs(:FSEventStreamCreate).returns(nil)
+        lambda { FSEvents::Stream.new(@path, @options) }.should raise_error(FSEvents::Stream::StreamError)
+      end
+      
+      it 'should not raise a StreamError exception if the stream could be created' do
+        lambda { FSEvents::Stream.new(@path, @options) }.should_not raise_error(FSEvents::Stream::StreamError)
       end
     end
+  end
+end
+
+describe FSEvents::Stream::StreamError do
+  it 'should be a type of StandardError' do
+    FSEvents::Stream::StreamError.should < StandardError
   end
 end

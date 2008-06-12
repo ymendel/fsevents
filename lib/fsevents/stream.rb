@@ -2,6 +2,8 @@ module FSEvents
   class Stream
     attr_reader :stream
     
+    class StreamError < StandardError; end
+    
     def initialize(path, options = {})
       allocator = options[:allocator] || OSX::KCFAllocatorDefault
       callback  = options[:callback]
@@ -12,6 +14,7 @@ module FSEvents
       flags     = options[:flags  ]   || 0
       
       @stream = OSX.FSEventStreamCreate(allocator, callback, context, path, since, latency, flags)
+      raise StreamError, 'Unable to create FSEvents stream.' unless @stream
     end
   end
 end
