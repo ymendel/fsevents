@@ -179,12 +179,11 @@ describe FSEvents::Stream do
     end
     
     it "should pass the 'get current' run loop" do
-      pending 'figuring out how to test this well'
       # CFRunLoopGetCurrent returns a different value every time it's called, so it's like testing Time.now
-      # The trouble is that while doing something like @now = Time.now; Time.stubs(:now).returns(@now) works, 
-      # the same sort of shenanigans with OSX.CFRunLoopGetCurrent caused problems for me, including the error message
-      # Cannot convert the passed-by-reference argument #0 as '{__FSEventStream=}' to Ruby
-      OSX.expects(:FSEventStreamScheduleWithRunLoop).with(anything, OSX.CFRunLoopGetCurrent, anything)
+      get_current_run_loop = OSX.CFRunLoopGetCurrent
+      OSX.stubs(:CFRunLoopGetCurrent).returns(get_current_run_loop)
+      
+      OSX.expects(:FSEventStreamScheduleWithRunLoop).with(anything, get_current_run_loop, anything)
       @stream.schedule
     end
     
