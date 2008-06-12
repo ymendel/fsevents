@@ -198,9 +198,22 @@ describe FSEvents::Stream do
   end
   
   describe 'when starting' do
+    before :each do
+      OSX.stubs(:FSEventStreamStart).returns(true)
+    end
+    
     it 'should start the stream' do
-      OSX.expects(:FSEventStreamStart).with(@stream.stream)
+      OSX.expects(:FSEventStreamStart).with(@stream.stream).returns(true)
       @stream.start
+    end
+    
+    it 'should raise a StreamError exception if the stream could not be started' do
+      OSX.stubs(:FSEventStreamStart).returns(nil)
+      lambda { @stream.start }.should raise_error(FSEvents::Stream::StreamError)
+    end
+    
+    it 'should not raise a StreamError exception if the stream could be started' do
+      lambda { @stream.start }.should_not raise_error(FSEvents::Stream::StreamError)
     end
   end
   

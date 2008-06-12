@@ -22,7 +22,7 @@ module FSEvents
     end
     
     def start
-      OSX.FSEventStreamStart(stream)
+      OSX.FSEventStreamStart(stream) or raise StreamError, 'Could not start stream'
     end
     
     def startup
