@@ -86,13 +86,49 @@ describe FSEvents::Stream do
         FSEvents::Stream.new(@path, @options)
       end
       
-      it 'should default the allocator to KCFAllocatorDefault'  # OSX::KCFAllocatorDefault
+      it 'should default the allocator to KCFAllocatorDefault' do
+        @options.delete(:allocator)
+        args = @arg_placeholders
+        args[0] = OSX::KCFAllocatorDefault
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
       # it 'should default the callback' # files changed
-      it 'should default the context to nil'
+      
+      it 'should default the context to nil' do
+        @options.delete(:context)
+        args = @arg_placeholders
+        args[2] = nil
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
       # it 'should default the path' # Dir.pwd
-      it 'should default the since to KFSEventStreamEventIdSinceNow'  # OSX::KFSEventStreamEventIdSinceNow 
-      it 'should default the latency to 1.0'
-      it 'should default the flags to 0'
+      
+      it 'should default the since to KFSEventStreamEventIdSinceNow' do
+        @options.delete(:since)
+        args = @arg_placeholders
+        args[4] = OSX::KFSEventStreamEventIdSinceNow
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should default the latency to 1.0' do
+        @options.delete(:latency)
+        args = @arg_placeholders
+        args[5] = 1.0
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should default the flags to 0' do
+        @options.delete(:flags)
+        args = @arg_placeholders
+        args[6] = 0
+        OSX.expects(:FSEventStreamCreate).with(*args)
+        FSEvents::Stream.new(@path, @options)
+      end
       
       it 'should store the stream'
     end

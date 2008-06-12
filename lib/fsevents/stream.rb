@@ -1,11 +1,15 @@
 module FSEvents
   class Stream
     def initialize(path, options = {})
-      stream_create_args  = []
-      stream_create_args.push *options.values_at(:allocator, :callback, :context)
-      stream_create_args.push [path]
-      stream_create_args.push *options.values_at(:since, :latency, :flags)
-      OSX.FSEventStreamCreate(*stream_create_args)
+      allocator = options[:allocator] || OSX::KCFAllocatorDefault
+      callback  = options[:callback]
+      context   = options[:context]   || nil
+      path      = [path]
+      since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
+      latency   = options[:latency]   || 1.0
+      flags     = options[:flags  ]   || 0
+      
+      OSX.FSEventStreamCreate(allocator, callback, context, path, since, latency, flags)
     end
   end
 end
