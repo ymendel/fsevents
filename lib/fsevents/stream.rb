@@ -8,12 +8,12 @@ module FSEvents
       options = {}
       options = paths.pop if paths.last.is_a?(Hash)
       
-      raise ArgumentError, "path required" if paths.empty?
+      paths = Dir.pwd if paths.empty?
       
       allocator = options[:allocator] || OSX::KCFAllocatorDefault
       callback  = options[:callback]
       context   = options[:context]   || nil
-      paths     = [*paths].flatten
+      paths     = [paths].flatten
       since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
       latency   = options[:latency]   || 1.0
       flags     = options[:flags  ]   || 0

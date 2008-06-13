@@ -20,8 +20,8 @@ describe FSEvents::Stream do
       lambda { FSEvents::Stream.new(@path) }.should_not raise_error(ArgumentError)
     end
     
-    it 'should require a path' do
-      lambda { FSEvents::Stream.new }.should raise_error(ArgumentError)
+    it 'should not require a path' do
+      lambda { FSEvents::Stream.new }.should_not raise_error(ArgumentError)
     end
     
     it 'should accept a hash of options' do
@@ -145,7 +145,12 @@ describe FSEvents::Stream do
         FSEvents::Stream.new(@path, @options)
       end
       
-      # it 'should default the path' # Dir.pwd
+      it 'should default the path to the present working directory' do
+        args = @arg_placeholders
+        args[3] = [Dir.pwd]
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
+        FSEvents::Stream.new(@options)
+      end
       
       it 'should default the since to KFSEventStreamEventIdSinceNow' do
         @options.delete(:since)
