@@ -28,6 +28,10 @@ describe FSEvents::Stream do
       lambda { FSEvents::Stream.new(@path, { :flags => 27 }) }.should_not raise_error(ArgumentError)
     end
     
+    it 'should accept an array of paths' do
+      lambda { FSEvents::Stream.new([@path, '/other/path']) }.should_not raise_error
+    end
+    
     it 'should create a new stream' do
       OSX.expects(:FSEventStreamCreate).returns(@stream)
       FSEvents::Stream.new(@path)
@@ -72,6 +76,14 @@ describe FSEvents::Stream do
         args[3] = [@path]
         OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
         FSEvents::Stream.new(@path, @options)
+      end
+      
+      it 'should pass the paths as-is if given an array of paths' do
+        other_path = '/other/path'
+        args = @arg_placeholders
+        args[3] = [@path, other_path]
+        OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream)
+        FSEvents::Stream.new([@path, other_path], @options)
       end
       
       it 'should pass the since (event ID)' do

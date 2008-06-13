@@ -4,16 +4,16 @@ module FSEvents
     
     class StreamError < StandardError; end
     
-    def initialize(path, options = {})
+    def initialize(paths, options = {})
       allocator = options[:allocator] || OSX::KCFAllocatorDefault
       callback  = options[:callback]
       context   = options[:context]   || nil
-      path      = [path]
+      paths     = [*paths]
       since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
       latency   = options[:latency]   || 1.0
       flags     = options[:flags  ]   || 0
       
-      @stream = OSX.FSEventStreamCreate(allocator, callback, context, path, since, latency, flags)
+      @stream = OSX.FSEventStreamCreate(allocator, callback, context, paths, since, latency, flags)
       raise StreamError, 'Unable to create FSEvents stream.' unless @stream
     end
     
