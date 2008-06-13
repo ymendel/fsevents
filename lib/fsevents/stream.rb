@@ -4,11 +4,16 @@ module FSEvents
     
     class StreamError < StandardError; end
     
-    def initialize(paths, options = {})
+    def initialize(*paths)
+      options = {}
+      options = paths.pop if paths.last.is_a?(Hash)
+      
+      raise ArgumentError, "path required" if paths.empty?
+      
       allocator = options[:allocator] || OSX::KCFAllocatorDefault
       callback  = options[:callback]
       context   = options[:context]   || nil
-      paths     = [*paths]
+      paths     = [*paths].flatten
       since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
       latency   = options[:latency]   || 1.0
       flags     = options[:flags  ]   || 0
