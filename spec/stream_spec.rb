@@ -16,12 +16,16 @@ describe FSEvents::Stream do
       OSX.stubs(:FSEventStreamCreate).returns(@stream)
     end
     
-    it 'should accept a path' do
-      lambda { FSEvents::Stream.new(@path) }.should_not raise_error(ArgumentError)
+    it 'should accept a path and callback block' do
+      lambda { FSEvents::Stream.new(@path) {} }.should_not raise_error(ArgumentError)
     end
     
     it 'should not require a path' do
-      lambda { FSEvents::Stream.new }.should_not raise_error(ArgumentError)
+      lambda { FSEvents::Stream.new() {} }.should_not raise_error(ArgumentError)
+    end
+    
+    it 'should not require a callback block' do
+      lambda { FSEvents::Stream.new(@path) }.should_not raise_error(ArgumentError)
     end
     
     it 'should accept a hash of options' do
@@ -42,6 +46,11 @@ describe FSEvents::Stream do
     
     it 'should accept multiple paths with options' do
       lambda { FSEvents::Stream.new(@path, '/other/path', :flags => 27) }.should_not raise_error
+    end
+    
+    it 'should store the callback block' do
+      callback = lambda {}
+      FSEvents::Stream.new(@path, &callback).callback.should == callback
     end
     
     describe 'handling options' do

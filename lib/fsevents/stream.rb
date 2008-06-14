@@ -1,11 +1,13 @@
 module FSEvents
   class Stream
     attr_reader :stream
-    attr_reader :allocator, :context, :paths, :since, :latency, :flags
+    attr_reader :allocator, :context, :paths, :since, :latency, :flags, :callback
     
     class StreamError < StandardError; end
     
-    def initialize(*paths)
+    def initialize(*paths, &callback)
+      @callback = callback
+      
       options = {}
       options = paths.pop if paths.last.is_a?(Hash)
       
