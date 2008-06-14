@@ -26,6 +26,11 @@ module FSEvents
       raise StreamError, 'Unable to create FSEvents stream.' unless @stream
     end
     
+    def create
+      @stream = OSX.FSEventStreamCreate(allocator, stream_callback, context, paths, since, latency, flags)
+      raise StreamError, 'Unable to create FSEvents stream.' unless @stream
+    end
+    
     def stream_callback
       lambda do |stream, context, event_count, paths, event_flags, event_IDs|
         paths.regard_as('*')

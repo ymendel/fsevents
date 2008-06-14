@@ -271,6 +271,97 @@ describe FSEvents::Stream do
     end
   end
   
+  it 'should create a stream' do
+    @stream.should respond_to(:create)
+  end
+  
+  describe 'when creating the stream' do
+    before :each do
+      @args = {}
+      [:allocator, :context, :paths, :since, :latency, :flags].each do |arg|
+        val = stub(arg.to_s)
+        
+        @stream.stubs(arg).returns(val)
+        @args[arg] = val
+      end
+      
+      @arg_placeholders = Array.new(7) { anything }
+      
+      @stream_val = stub('stream')
+      OSX.stubs(:FSEventStreamCreate).returns(@stream_val)
+    end
+    
+    it 'should create an FSEvent stream' do
+      OSX.expects(:FSEventStreamCreate).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should pass the allocator' do
+      args = @arg_placeholders
+      args[0] = @args[:allocator]
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should pass the stream callback' do
+      # stream_callback returns a different proc every time it's called
+      @stream.stubs(:stream_callback).returns(stub('stream callback'))
+      args = @arg_placeholders
+      args[1] = @stream.stream_callback
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should pass the context' do
+      args = @arg_placeholders
+      args[2] = @args[:context]
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should pass the paths' do
+      args = @arg_placeholders
+      args[3] = @args[:paths]
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it "should pass 'since' (event ID)" do
+      args = @arg_placeholders
+      args[4] = @args[:since]
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should pass the latency' do
+      args = @arg_placeholders
+      args[5] = @args[:latency]
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should pass the flags' do
+      args = @arg_placeholders
+      args[6] = @args[:flags]
+      OSX.expects(:FSEventStreamCreate).with(*args).returns(@stream_val)
+      @stream.create
+    end
+    
+    it 'should store the stream' do
+      @stream.create
+      @stream.stream.should == @stream_val
+    end
+    
+    it 'should raise a StreamError exception if the stream could not be created' do
+      OSX.stubs(:FSEventStreamCreate).returns(nil)
+      lambda { @stream.create }.should raise_error(FSEvents::Stream::StreamError)
+    end
+    
+    it 'should not raise a StreamError exception if the stream could be created' do
+      lambda { @stream.create }.should_not raise_error(FSEvents::Stream::StreamError)
+    end
+  end
+  
   it 'should have a stream callback' do
     @stream.should respond_to(:stream_callback)
   end
