@@ -3,7 +3,7 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 describe FSEvents::Stream do
   before :each do
     @path = "/tmp"    
-    @stream = FSEvents::Stream.new(@path)
+    @stream = FSEvents::Stream.new(@path) {}
   end
   
   describe 'when initialized' do
@@ -15,28 +15,28 @@ describe FSEvents::Stream do
       lambda { FSEvents::Stream.new() {} }.should_not raise_error(ArgumentError)
     end
     
-    it 'should not require a callback block' do
-      lambda { FSEvents::Stream.new(@path) }.should_not raise_error(ArgumentError)
+    it 'should require a callback block' do
+      lambda { FSEvents::Stream.new(@path) }.should raise_error(ArgumentError)
     end
     
     it 'should accept a hash of options' do
-      lambda { FSEvents::Stream.new(@path, :flags => 27 ) }.should_not raise_error(ArgumentError)
+      lambda { FSEvents::Stream.new(@path, :flags => 27 ) {} }.should_not raise_error(ArgumentError)
     end
     
     it 'should accept an array of paths' do
-      lambda { FSEvents::Stream.new([@path, '/other/path']) }.should_not raise_error
+      lambda { FSEvents::Stream.new([@path, '/other/path']) {} }.should_not raise_error
     end
     
     it 'should accept an array of paths with options' do
-      lambda { FSEvents::Stream.new([@path, '/other/path'], :flags => 27) }.should_not raise_error
+      lambda { FSEvents::Stream.new([@path, '/other/path'], :flags => 27) {} }.should_not raise_error
     end
     
     it 'should accept multiple paths' do
-      lambda { FSEvents::Stream.new(@path, '/other/path') }.should_not raise_error
+      lambda { FSEvents::Stream.new(@path, '/other/path') {} }.should_not raise_error
     end
     
     it 'should accept multiple paths with options' do
-      lambda { FSEvents::Stream.new(@path, '/other/path', :flags => 27) }.should_not raise_error
+      lambda { FSEvents::Stream.new(@path, '/other/path', :flags => 27) {} }.should_not raise_error
     end
     
     it 'should store the callback block' do
@@ -54,64 +54,64 @@ describe FSEvents::Stream do
       end
       
       it 'should store the allocator' do
-        FSEvents::Stream.new(@path, @options).allocator.should == @options[:allocator]
+        FSEvents::Stream.new(@path, @options) {}.allocator.should == @options[:allocator]
       end
       
       it 'should default the allocator to KCFAllocatorDefault' do
         @options.delete(:allocator)
-        FSEvents::Stream.new(@path, @options).allocator.should == OSX::KCFAllocatorDefault
+        FSEvents::Stream.new(@path, @options) {}.allocator.should == OSX::KCFAllocatorDefault
       end
       
       it 'should store the context' do
-        FSEvents::Stream.new(@path, @options).context.should == @options[:context]
+        FSEvents::Stream.new(@path, @options) {}.context.should == @options[:context]
       end
       
       it 'should default the context to nil' do
         @options.delete(:context)
-        FSEvents::Stream.new(@path, @options).context.should == nil
+        FSEvents::Stream.new(@path, @options) {}.context.should == nil
       end
       
       it 'should store the path as an array' do
-        FSEvents::Stream.new(@path, @options).paths.should == [@path]
+        FSEvents::Stream.new(@path, @options) {}.paths.should == [@path]
       end
       
       it 'should store an array of paths as-is' do
-        FSEvents::Stream.new([@path, @other_path], @options).paths.should == [@path, @other_path]
+        FSEvents::Stream.new([@path, @other_path], @options) {}.paths.should == [@path, @other_path]
       end
       
       it 'should store multiple paths as an array' do
-        FSEvents::Stream.new(@path, @other_path, @options).paths.should == [@path, @other_path]
+        FSEvents::Stream.new(@path, @other_path, @options) {}.paths.should == [@path, @other_path]
       end
       
       it 'should default the path to the present working directory' do
-        FSEvents::Stream.new(@options).paths.should == [Dir.pwd]
+        FSEvents::Stream.new(@options) {}.paths.should == [Dir.pwd]
       end
       
       it "should store 'since' (event ID)" do
-        FSEvents::Stream.new(@path, @options).since.should == @options[:since]
+        FSEvents::Stream.new(@path, @options) {}.since.should == @options[:since]
       end
       
       it "should default 'since' to KFSEventStreamEventIdSinceNow" do
         @options.delete(:since)
-        FSEvents::Stream.new(@path, @options).since.should == OSX::KFSEventStreamEventIdSinceNow
+        FSEvents::Stream.new(@path, @options) {}.since.should == OSX::KFSEventStreamEventIdSinceNow
       end
       
       it 'should store the latency' do
-        FSEvents::Stream.new(@path, @options).latency.should == @options[:latency]
+        FSEvents::Stream.new(@path, @options) {}.latency.should == @options[:latency]
       end
       
       it 'should default the latency to 1.0' do
         @options.delete(:latency)
-        FSEvents::Stream.new(@path, @options).latency.should == 1.0
+        FSEvents::Stream.new(@path, @options) {}.latency.should == 1.0
       end
       
       it 'should store the flags' do
-        FSEvents::Stream.new(@path, @options).flags.should == @options[:flags]
+        FSEvents::Stream.new(@path, @options) {}.flags.should == @options[:flags]
       end
       
       it 'should default the flags to 0' do
         @options.delete(:flags)
-        FSEvents::Stream.new(@path, @options).flags.should == 0
+        FSEvents::Stream.new(@path, @options) {}.flags.should == 0
       end
     end
   end

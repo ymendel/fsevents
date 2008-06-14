@@ -6,6 +6,7 @@ module FSEvents
     class StreamError < StandardError; end
     
     def initialize(*paths, &callback)
+      raise ArgumentError, 'A callback block is required' if callback.nil?
       @callback = callback
       
       options = {}
