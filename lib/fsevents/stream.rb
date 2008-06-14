@@ -26,6 +26,17 @@ module FSEvents
       raise StreamError, 'Unable to create FSEvents stream.' unless @stream
     end
     
+    def stream_callback
+      lambda do |stream, context, event_count, paths, event_flags, event_IDs|
+        paths.regard_as('*')
+        
+        events = []
+        event_count.times { |i|  events << paths[i] }
+        
+        callback.call(events)
+      end
+    end
+    
     def schedule
       OSX.FSEventStreamScheduleWithRunLoop(stream, OSX.CFRunLoopGetCurrent, OSX::KCFRunLoopDefaultMode)
     end

@@ -271,6 +271,66 @@ describe FSEvents::Stream do
     end
   end
   
+  it 'should have a stream callback' do
+    @stream.should respond_to(:stream_callback)
+  end
+  
+  describe 'stream callback' do
+    it 'should return a proc' do
+      @stream.stream_callback.should be_kind_of(Proc)
+    end
+    
+    describe 'proc' do
+      before :each do
+        @callback_arg_order = [:stream, :context, :event_count, :paths, :event_flags, :event_IDs]
+        @args_hash = {}
+        [:stream, :context].each do |arg|
+          @args_hash[arg] = stub(arg.to_s)
+        end
+        @args_hash[:event_count] = 0
+        [:paths, :event_flags, :event_IDs].each do |arg|
+          @args_hash[arg] = []
+        end
+        @args_hash[:paths].stubs(:regard_as)
+        
+        @args = @args_hash.values_at(*@callback_arg_order)
+        
+        @callback = stub('callback', :call => nil)
+        @stream.stubs(:callback).returns(@callback)
+        
+        @proc = @stream.stream_callback
+      end
+      
+      it 'should accept stream, context, event count, paths, event flags, and event IDs' do
+        lambda { @proc.call(*@args) }.should_not raise_error(ArgumentError)
+      end
+      
+      it "should regard the paths as '*'" do
+        @args_hash[:paths].expects(:regard_as).with('*')
+        @proc.call(*@args)
+      end
+      
+      it 'should call the stored callback' do
+        @callback.expects(:call)
+        @proc.call(*@args)
+      end
+      
+      it 'should collect the paths and pass them to the stored callback' do
+        event_count = 3
+        @args_hash[:event_count] = event_count
+        paths = []
+        event_count.times do |i|
+          val = "/some/path/to/dir/number/#{i+1}"
+          @args_hash[:paths].push val
+          paths.push val
+        end
+        @args = @args_hash.values_at(*@callback_arg_order)
+        @callback.expects(:call).with(paths)
+        @proc.call(*@args)
+      end
+    end
+  end
+  
   it 'should schedule itself' do
     @stream.should respond_to(:schedule)
   end
