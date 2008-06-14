@@ -44,6 +44,77 @@ describe FSEvents::Stream do
       lambda { FSEvents::Stream.new(@path, '/other/path', :flags => 27) }.should_not raise_error
     end
     
+    describe 'handling options' do
+      before :each do
+        @options = {}
+        [:allocator, :context, :since, :latency, :flags].each do |opt|
+          @options[opt] = stub(opt.to_s)
+        end
+        @other_path = '/other/path'
+      end
+      
+      it 'should store the allocator' do
+        FSEvents::Stream.new(@path, @options).allocator.should == @options[:allocator]
+      end
+      
+      it 'should default the allocator to KCFAllocatorDefault' do
+        @options.delete(:allocator)
+        FSEvents::Stream.new(@path, @options).allocator.should == OSX::KCFAllocatorDefault
+      end
+      
+      it 'should store the context' do
+        FSEvents::Stream.new(@path, @options).context.should == @options[:context]
+      end
+      
+      it 'should default the context to nil' do
+        @options.delete(:context)
+        FSEvents::Stream.new(@path, @options).context.should == nil
+      end
+      
+      it 'should store the path as an array' do
+        FSEvents::Stream.new(@path, @options).paths.should == [@path]
+      end
+      
+      it 'should store an array of paths as-is' do
+        FSEvents::Stream.new([@path, @other_path], @options).paths.should == [@path, @other_path]
+      end
+      
+      it 'should store multiple paths as an array' do
+        FSEvents::Stream.new(@path, @other_path, @options).paths.should == [@path, @other_path]
+      end
+      
+      it 'should default the path to the present working directory' do
+        FSEvents::Stream.new(@options).paths.should == [Dir.pwd]
+      end
+      
+      it "should store 'since' (event ID)" do
+        FSEvents::Stream.new(@path, @options).since.should == @options[:since]
+      end
+      
+      it "should default 'since' to KFSEventStreamEventIdSinceNow" do
+        @options.delete(:since)
+        FSEvents::Stream.new(@path, @options).since.should == OSX::KFSEventStreamEventIdSinceNow
+      end
+      
+      it 'should store the latency' do
+        FSEvents::Stream.new(@path, @options).latency.should == @options[:latency]
+      end
+      
+      it 'should default the latency to 1.0' do
+        @options.delete(:latency)
+        FSEvents::Stream.new(@path, @options).latency.should == 1.0
+      end
+      
+      it 'should store the flags' do
+        FSEvents::Stream.new(@path, @options).flags.should == @options[:flags]
+      end
+      
+      it 'should default the flags to 0' do
+        @options.delete(:flags)
+        FSEvents::Stream.new(@path, @options).flags.should == 0
+      end
+    end
+    
     it 'should create a new stream' do
       OSX.expects(:FSEventStreamCreate).returns(@stream)
       FSEvents::Stream.new(@path)

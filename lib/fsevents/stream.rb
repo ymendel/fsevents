@@ -1,6 +1,7 @@
 module FSEvents
   class Stream
     attr_reader :stream
+    attr_reader :allocator, :context, :paths, :since, :latency, :flags
     
     class StreamError < StandardError; end
     
@@ -10,14 +11,15 @@ module FSEvents
       
       paths = Dir.pwd if paths.empty?
       
-      allocator = options[:allocator] || OSX::KCFAllocatorDefault
+      @allocator = options[:allocator] || OSX::KCFAllocatorDefault
       callback  = options[:callback]
-      context   = options[:context]   || nil
-      paths     = [paths].flatten
-      since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
-      latency   = options[:latency]   || 1.0
-      flags     = options[:flags  ]   || 0
+      @context   = options[:context]   || nil
+      @paths     = [paths].flatten
+      @since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
+      @latency   = options[:latency]   || 1.0
+      @flags     = options[:flags  ]   || 0
       
+      paths = @paths
       @stream = OSX.FSEventStreamCreate(allocator, callback, context, paths, since, latency, flags)
       raise StreamError, 'Unable to create FSEvents stream.' unless @stream
     end
