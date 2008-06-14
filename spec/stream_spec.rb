@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe FSEvents::Stream do
   before :each do
-    @path = "/tmp"    
+    @path = '/tmp'
     @stream = FSEvents::Stream.new(@path) {}
   end
   
@@ -264,6 +264,55 @@ describe FSEvents::Stream do
         @callback.expects(:call).with(paths)
         @proc.call(*@args)
       end
+    end
+  end
+  
+  it 'should create' do
+    FSEvents::Stream.should respond_to(:create)
+  end
+  
+  describe 'when creating' do
+    before :each do
+      @other_path = '/other/path'
+    end
+    
+    # This is just here for organization and use of the before block.
+    # I'd like to ensure that the block is passed to new, but mocha expecation apparently doesn't support that.
+    # So instead I stub new for some testing and then have something that actually uses new and sees the callback
+    # is the expected block.
+    describe do
+      before :each do
+        @stream.stubs(:create)
+        FSEvents::Stream.stubs(:new).returns(@stream)
+      end
+      
+      it 'should accept arguments and a block' do
+        lambda { FSEvents::Stream.create(@path, @other_path, :flags => 27) {} }.should_not raise_error(ArgumentError)
+      end
+      
+      it 'should initialize a new stream object' do
+        FSEvents::Stream.expects(:new).returns(@stream)
+        FSEvents::Stream.create(@path, @other_path, :flags => 27) {}
+      end
+      
+      it 'should pass the arguments to the initialization' do
+        FSEvents::Stream.expects(:new).with(@path, @other_path, :flags => 27).returns(@stream)
+        FSEvents::Stream.create(@path, @other_path, :flags => 27) {}
+      end
+      
+      it 'should make the resultant stream object create a stream' do
+        @stream.expects(:create)
+        FSEvents::Stream.create(@path, @other_path, :flags => 27) {}
+      end
+      
+      it 'should return the stream object' do
+        FSEvents::Stream.create.should == @stream
+      end
+    end
+    
+    it 'should pass the callback block' do
+      callback = lambda {}
+      FSEvents::Stream.create(@path, @other_path, :flags => 27, &callback).callback.should == callback
     end
   end
   

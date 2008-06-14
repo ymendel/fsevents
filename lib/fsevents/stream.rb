@@ -51,6 +51,14 @@ module FSEvents
       start
     end
     
+    class << self
+      def create(*args, &block)
+        stream = new(*args, &block)
+        stream.create
+        stream
+      end
+    end
+    
     def stop
       OSX.FSEventStreamStop(stream)
     end
