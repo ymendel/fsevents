@@ -14,16 +14,11 @@ module FSEvents
       paths = Dir.pwd if paths.empty?
       
       @allocator = options[:allocator] || OSX::KCFAllocatorDefault
-      callback  = options[:callback]
       @context   = options[:context]   || nil
       @paths     = [paths].flatten
       @since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
       @latency   = options[:latency]   || 1.0
-      @flags     = options[:flags  ]   || 0
-      
-      paths = @paths
-      @stream = OSX.FSEventStreamCreate(allocator, callback, context, paths, since, latency, flags)
-      raise StreamError, 'Unable to create FSEvents stream.' unless @stream
+      @flags     = options[:flags]     || 0
     end
     
     def create
