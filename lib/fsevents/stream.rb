@@ -57,6 +57,12 @@ module FSEvents
         stream.create
         stream
       end
+      
+      def watch(*args, &block)
+        stream = create(*args, &block)
+        stream.startup
+        stream
+      end
     end
     
     def stop

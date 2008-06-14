@@ -379,6 +379,55 @@ describe FSEvents::Stream do
     end
   end
   
+  it 'should watch' do
+    FSEvents::Stream.should respond_to(:watch)
+  end
+  
+  describe 'when watching' do
+    before :each do
+      @other_path = '/other/path'
+    end
+    
+    # This is just here for organization and use of the before block.
+    # I'd like to ensure that the block is passed to create, but mocha expecation apparently doesn't support that.
+    # So instead I stub create for some testing and then have something that actually uses create and sees the callback
+    # is the expected block.
+    describe do
+      before :each do
+        @stream.stubs(:startup)
+        FSEvents::Stream.stubs(:create).returns(@stream)
+      end
+      
+      it 'should accept arguments and a block' do
+        lambda { FSEvents::Stream.watch(@path, @other_path, :flags => 27) {} }.should_not raise_error(ArgumentError)
+      end
+      
+      it 'should create a stream object' do
+        FSEvents::Stream.expects(:create).returns(@stream)
+        FSEvents::Stream.watch(@path, @other_path, :flags => 27) {}
+      end
+      
+      it 'should pass the arguments to the creation' do
+        FSEvents::Stream.expects(:create).with(@path, @other_path, :flags => 27).returns(@stream)
+        FSEvents::Stream.watch(@path, @other_path, :flags => 27) {}
+      end
+      
+      it 'should start up the resultant stream object' do
+        @stream.expects(:startup)
+        FSEvents::Stream.watch(@path, @other_path, :flags => 27) {}
+      end
+      
+      it 'should return the stream object' do
+        FSEvents::Stream.watch.should == @stream
+      end
+    end
+    
+    it 'should pass the callback block' do
+      callback = lambda {}
+      FSEvents::Stream.watch(@path, @other_path, :flags => 27, &callback).callback.should == callback
+    end
+  end
+  
   it 'should stop itself' do
     @stream.should respond_to(:stop)
   end
