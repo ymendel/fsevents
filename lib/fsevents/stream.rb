@@ -34,7 +34,7 @@ module FSEvents
         paths.regard_as('*')
         
         events = []
-        event_count.times { |i|  events << paths[i] }
+        event_count.times { |i|  events << Event.new(event_IDs[i], paths[i], self) }
         
         callback.call(events)
       end

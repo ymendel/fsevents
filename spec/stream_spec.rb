@@ -251,17 +251,22 @@ describe FSEvents::Stream do
         @proc.call(*@args)
       end
       
-      it 'should collect the paths and pass them to the stored callback' do
+      it 'should collect the paths and IDs, create Event objects, and pass them to the stored callback' do
         event_count = 3
         @args_hash[:event_count] = event_count
-        paths = []
+        events = []
         event_count.times do |i|
-          val = "/some/path/to/dir/number/#{i+1}"
-          @args_hash[:paths].push val
-          paths.push val
+          path = "/some/path/to/dir/number/#{i+1}"
+          id = i + 1
+          @args_hash[:paths].push path
+          @args_hash[:event_IDs].push id
+          
+          event = stub("event #{path}")
+          FSEvents::Event.stubs(:new).with(id, path, @stream).returns(event)
+          events.push event
         end
         @args = @args_hash.values_at(*@callback_arg_order)
-        @callback.expects(:call).with(paths)
+        @callback.expects(:call).with(events)
         @proc.call(*@args)
       end
     end
