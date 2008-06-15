@@ -269,6 +269,11 @@ describe FSEvents::Stream do
         @callback.expects(:call).with(events)
         @proc.call(*@args)
       end
+      
+      it "should update the stream's last event" do
+        @stream.expects(:update_last_event)
+        @proc.call(*@args)
+      end
     end
   end
   
@@ -381,6 +386,24 @@ describe FSEvents::Stream do
     
     it 'should not raise a StreamError exception if the stream could be started' do
       lambda { @stream.start }.should_not raise_error(FSEvents::Stream::StreamError)
+    end
+    
+    it 'should update its last event' do
+      @stream.expects(:update_last_event)
+      @stream.start
+    end
+  end
+  
+  it 'should update its last event' do
+    @stream.should respond_to(:update_last_event)
+  end
+  
+  describe 'updating its last event' do
+    it 'should store the last event time' do
+      now = Time.now
+      Time.stubs(:now).returns(now)
+      @stream.update_last_event
+      @stream.last_event.should == now
     end
   end
   

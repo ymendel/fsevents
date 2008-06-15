@@ -2,7 +2,7 @@ require 'fsevents/event'
 
 module FSEvents
   class Stream
-    attr_reader :stream
+    attr_reader :stream, :last_event
     attr_reader :allocator, :context, :paths, :since, :latency, :flags, :callback
     
     class StreamError < StandardError; end
@@ -37,6 +37,8 @@ module FSEvents
         event_count.times { |i|  events << Event.new(event_IDs[i], paths[i], self) }
         
         callback.call(events)
+        
+        update_last_event
       end
     end
     
@@ -46,6 +48,11 @@ module FSEvents
     
     def start
       OSX.FSEventStreamStart(stream) or raise StreamError, 'Could not start stream'
+      update_last_event
+    end
+    
+    def update_last_event
+      @last_event = Time.now
     end
     
     def startup
