@@ -1,10 +1,10 @@
 require 'fsevents/version'
 
-AUTHOR = 'FIXME full name'  # can also be an array of Authors
-EMAIL = "FIXME email"
-DESCRIPTION = "description of gem"
+AUTHOR = 'Yossef Mendelssohn'  # can also be an array of Authors
+EMAIL = "ymendel@pobox.com"
+DESCRIPTION = "Simple, usable FSEvents API"
 GEM_NAME = 'fsevents' # what ppl will type to install your gem
-RUBYFORGE_PROJECT = 'fsevents' # The unix name for your project
+RUBYFORGE_PROJECT = 'yomendel' # The unix name for your project
 HOMEPATH = "http://#{RUBYFORGE_PROJECT}.rubyforge.org"
 DOWNLOAD_PATH = "http://rubyforge.org/projects/#{RUBYFORGE_PROJECT}"
 EXTRA_DEPENDENCIES = [
