@@ -1,3 +1,5 @@
+require 'fsevents/event'
+
 module FSEvents
   class Stream
     attr_reader :stream
