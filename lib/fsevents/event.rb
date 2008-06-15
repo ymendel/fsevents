@@ -11,5 +11,9 @@ module FSEvents
     def files
       Dir["#{path}/*"]
     end
+    
+    def modified_files
+      files.select { |f|  File.mtime(f) >= stream.last_event }
+    end
   end
 end

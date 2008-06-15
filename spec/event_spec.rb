@@ -47,5 +47,59 @@ describe FSEvents::Event do
     it 'should get files from the path' do
       @event.files.sort.should == Dir["#{@path}/*"].sort
     end
-  end  
+  end
+  
+  it 'should list modified files' do
+    @event.should respond_to(:modified_files)
+  end
+
+  describe 'listing modified files' do
+    before :each do
+      @now = Time.now
+      @stream.stubs(:last_event).returns(@now)
+      @files = Array.new(5) do |i|
+        file = stub("file #{i+1}")
+        File.stubs(:mtime).with(file).returns(@now + i - 2)
+        file
+      end
+      @event.stubs(:files).returns(@files)
+    end
+
+    it 'should get the file list' do
+      @event.expects(:files).returns(@files)
+      @event.modified_files
+    end
+
+    it 'should get the last event time from the stream' do
+      @stream.expects(:last_event).returns(@now)
+      @event.modified_files
+    end
+
+    it 'should return files modified after the last event time' do
+      expected_files = @files.values_at(3, 4)
+      modified_files = @event.modified_files
+
+      expected_files.each do |file|
+        modified_files.should include(file)
+      end
+    end
+
+    it 'should return files modified at the last event time' do
+      expected_files = @files.values_at(2)
+      modified_files = @event.modified_files
+
+      expected_files.each do |file|
+        modified_files.should include(file)
+      end
+    end
+
+    it 'should not return files not modified after the last event time' do
+      unexpected_files = @files.values_at(0, 1)
+      modified_files = @event.modified_files
+
+      unexpected_files.each do |file|
+        modified_files.should_not include(file)
+      end
+    end
+  end
 end
