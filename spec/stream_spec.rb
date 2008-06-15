@@ -545,6 +545,17 @@ describe FSEvents::Stream do
       @stream.shutdown
     end
   end
+  
+  it 'should run' do
+    @stream.should respond_to(:run)
+  end
+  
+  describe 'running' do
+    it 'should enter the run loop' do
+      OSX.expects(:CFRunLoopRun)
+      @stream.run
+    end
+  end
 end
 
 describe FSEvents::Stream::StreamError do

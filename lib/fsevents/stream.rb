@@ -92,5 +92,9 @@ module FSEvents
       invalidate
       release
     end
+    
+    def run
+      OSX.CFRunLoopRun
+    end
   end
 end
