@@ -1,3 +1,8 @@
+== 0.0.2 2008-06-17
+
+* 1 tiny enhancement:
+  * Extending the events array with #files and #modified_files.
+
 == 0.0.1 2008-06-15
 
 * 1 major enhancement:

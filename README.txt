@@ -39,9 +39,18 @@
       end
       stream.run
   
-   Try that and make some new files in /tmp. Exciting, isn't it?
-   
-   FSEvents::Stream.watch takes some options, most of which I fully admit I don't understand because I have little desire to read the documentation on FSEvents itself. One obvious option is latency, which the number of seconds to wait until an event is reported. A higher number allows FSEvents to bundle events.
+  Try that and make some new files in /tmp. Exciting, isn't it?
+  
+  And for the common case of wanting to process every modified file no matter which subdirectory it happens to be under, the events array is extended for your convenience.
+  
+      require 'fsevents'
+  
+      stream = FSEvents::Stream.watch('/tmp') do |events|
+        p events.modified_files
+      end
+      stream.run
+  
+  FSEvents::Stream.watch takes some options, most of which I fully admit I don't understand because I have little desire to read the documentation on FSEvents itself. One obvious option is latency, which the number of seconds to wait until an event is reported. A higher number allows FSEvents to bundle events.
    
       stream = FSEvents::Stream.watch('/tmp', :latency => 15) {}  # default is 1.0
       
@@ -72,14 +81,13 @@
   
       stream.stop
   
-  A stream can also be invalidated and release it.
+  A stream can also be invalidated and released.
   
       stream.invalidate
       
       stream.release
       
       stream.shutdown  # stops, invalidates, and releases the stream
-  
   
   From what I can tell, entering the run loop requires an interrupt to get back out. Bear that in mind.
   

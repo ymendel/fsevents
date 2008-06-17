@@ -7,12 +7,15 @@ config/hoe.rb
 config/requirements.rb
 lib/fsevents.rb
 lib/fsevents/event.rb
+lib/fsevents/ext.rb
+lib/fsevents/ext/array.rb
 lib/fsevents/stream.rb
 lib/fsevents/version.rb
 script/console
 script/destroy
 script/generate
 setup.rb
+spec/event_array_spec.rb
 spec/event_spec.rb
 spec/fsevents_spec.rb
 spec/spec.opts
