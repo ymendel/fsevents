@@ -34,6 +34,7 @@ module FSEvents
         paths.regard_as('*')
         
         events = []
+        events.extend(EventArray)
         event_count.times { |i|  events << Event.new(event_IDs[i], paths[i], self) }
         
         callback.call(events)

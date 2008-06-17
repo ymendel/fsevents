@@ -4,6 +4,7 @@ $:.unshift(File.dirname(__FILE__)) unless
 require 'osx/foundation'
 OSX.require_framework '/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework'
 
+require 'fsevents/ext'
 require 'fsevents/stream'
 
 module FSEvents

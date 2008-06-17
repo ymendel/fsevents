@@ -270,6 +270,12 @@ describe FSEvents::Stream do
         @proc.call(*@args)
       end
       
+      it 'should extend the event array' do
+        @args = @args_hash.values_at(*@callback_arg_order)
+        @callback.expects(:call).with { |events|  events.is_a?(EventArray) }
+        @proc.call(*@args)
+      end
+      
       it "should update the stream's last event" do
         @stream.expects(:update_last_event)
         @proc.call(*@args)
