@@ -272,7 +272,7 @@ describe FSEvents::Stream do
       
       it 'should extend the event array' do
         @args = @args_hash.values_at(*@callback_arg_order)
-        @callback.expects(:call).with { |events|  events.is_a?(EventArray) }
+        @callback.expects(:call).with(kind_of(EventArray))
         @proc.call(*@args)
       end
       
