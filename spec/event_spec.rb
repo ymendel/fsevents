@@ -34,6 +34,10 @@ describe FSEvents::Event do
       FSEvents::Event.new(@id, @path, @stream).path.should == @path
     end
     
+    it 'should strip a trailing / from the path' do
+      FSEvents::Event.new(@id, "#{@path}/", @stream).path.should == @path
+    end
+    
     it 'should store the stream' do
       FSEvents::Event.new(@id, @path, @stream).stream.should == @stream
     end

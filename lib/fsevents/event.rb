@@ -4,7 +4,7 @@ module FSEvents
     
     def initialize(id, path, stream)
       @id     = id
-      @path   = path
+      @path   = path.sub(%r%/$%, '')
       @stream = stream
     end
     

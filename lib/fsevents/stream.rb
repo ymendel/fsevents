@@ -21,10 +21,11 @@ module FSEvents
       @dirs = {}
       
       paths = Dir.pwd if paths.empty?
+      paths = [paths].flatten.collect { |path|  path.sub(%r%/$%, '') }
       
       @allocator = options[:allocator] || OSX::KCFAllocatorDefault
       @context   = options[:context]   || nil
-      @paths     = [paths].flatten
+      @paths     = paths
       @since     = options[:since]     || OSX::KFSEventStreamEventIdSinceNow
       @latency   = options[:latency]   || 1.0
       @flags     = options[:flags]     || 0

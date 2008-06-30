@@ -88,6 +88,10 @@ describe FSEvents::Stream do
         FSEvents::Stream.new(@options) {}.paths.should == [Dir.pwd]
       end
       
+      it 'should strip a trailing slash from the path' do
+        FSEvents::Stream.new("#{@path}/", "#{@other_path}/", @options) {}.paths.should == [@path, @other_path]
+      end
+      
       it "should store 'since' (event ID)" do
         FSEvents::Stream.new(@path, @options) {}.since.should == @options[:since]
       end
