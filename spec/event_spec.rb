@@ -188,6 +188,16 @@ describe FSEvents::Event do
           modified_files.should_not include(file)
         end
       end
+      
+      it 'should handle this path not yet cached' do
+        @dir_cache.delete(@path)
+        expected_files = @files
+        modified_files = @event.modified_files
+        
+        expected_files.each do |file|
+          modified_files.should include(file)
+        end
+      end
     end
   end
 end

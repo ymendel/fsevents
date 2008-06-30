@@ -17,7 +17,7 @@ module FSEvents
       when :mtime
         files.select { |f|  File.mtime(f) >= stream.last_event }
       when :cache
-        cache = stream.dirs[path]
+        cache = stream.dirs[path] || {}
         
         files.select do |f|
           cached = cache[f]
