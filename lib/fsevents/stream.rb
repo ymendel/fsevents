@@ -2,7 +2,7 @@ require 'fsevents/event'
 
 module FSEvents
   class Stream
-    attr_reader :stream, :mode, :last_event
+    attr_reader :stream, :mode, :last_event, :dirs
     attr_reader :allocator, :context, :paths, :since, :latency, :flags, :callback
     
     class StreamError < StandardError; end
@@ -18,6 +18,7 @@ module FSEvents
       
       @mode = options[:mode] || :mtime
       raise ArgumentError, "Mode '#{mode}' unknown" unless MODES.include?(@mode)
+      @dirs = {}
       
       paths = Dir.pwd if paths.empty?
       
@@ -58,7 +59,17 @@ module FSEvents
     end
     
     def update_last_event
-      @last_event = Time.now
+      case mode
+      when :mtime
+        @last_event = Time.now
+      when :cache
+        paths.each do |path|
+          dirs[path] = {}
+          Dir["#{path}/*"].each do |file|
+            dirs[path][file] = File::Stat.new(file)
+          end
+        end
+      end
     end
     
     def startup

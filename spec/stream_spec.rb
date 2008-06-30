@@ -419,11 +419,79 @@ describe FSEvents::Stream do
   end
   
   describe 'updating its last event' do
-    it 'should store the last event time' do
-      now = Time.now
-      Time.stubs(:now).returns(now)
-      @stream.update_last_event
-      @stream.last_event.should == now
+    describe 'when mode is mtime' do
+      before :each do
+        @stream.stubs(:mode).returns(:mtime)
+      end
+      
+      it 'should store the last event time' do
+        now = Time.now
+        Time.stubs(:now).returns(now)
+        @stream.update_last_event
+        @stream.last_event.should == now
+      end
+    end
+    
+    describe 'when mode is cache' do
+      before :each do
+        @stream.stubs(:mode).returns(:cache)
+        @files = Array.new(5) { |i|  stub("file #{i+1}") }
+        @stats = Array.new(5) { |i|  stub("file #{i+1} stat") }
+        
+        @files.zip(@stats).each do |file, stat|
+          File::Stat.stubs(:new).with(file).returns(stat)
+        end
+        
+        Dir.stubs(:[]).returns(@files)
+      end
+      
+      it 'should get the contents of its path' do
+        Dir.expects(:[]).with("#{@path}/*").returns([])
+        @stream.update_last_event
+      end
+      
+      it 'should get stat objects for the path contents' do
+        @files.zip(@stats).each do |file, stat|
+          File::Stat.expects(:new).with(file).returns(stat)
+        end
+        @stream.update_last_event
+      end
+      
+      it 'should cache the stat objects' do
+        @stream.update_last_event
+        
+        @files.zip(@stats).each do |file, stat|
+          @stream.dirs[@path][file].should == stat
+        end
+      end
+      
+      it 'should update already-existent cache entries' do
+        file = @files[3]
+        val  = @stats[3]
+        @stream.dirs[@path] = { file => 'some other val' }
+        
+        @stream.update_last_event
+        @stream.dirs[@path][file].should == val
+      end
+      
+      it 'should remove non-needed cache entries' do
+        file = 'some other file'
+        @stream.dirs[@path] = { file => 'some val' }
+        
+        @stream.update_last_event
+        @stream.dirs[@path].should_not have_key(file)
+      end
+      
+      it 'should handle multiple paths' do
+        other_path = '/other/path'
+        paths = [@path, other_path]
+        @stream.stubs(:paths).returns(paths)
+        
+        paths.each do |path|
+          Dir.expects(:[]).with("#{path}/*").returns([])
+        end
+        @stream.update_last_event
+      end
     end
   end
   
