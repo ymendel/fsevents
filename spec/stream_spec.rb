@@ -436,7 +436,7 @@ describe FSEvents::Stream do
       before :each do
         @stream.stubs(:mode).returns(:cache)
         @files = Array.new(5) { |i|  stub("file #{i+1}") }
-        @stats = Array.new(5) { |i|  stub("file #{i+1} stat") }
+        @stats = Array.new(5) { |i|  stub("file #{i+1} stat", :directory? => false) }
         
         @files.zip(@stats).each do |file, stat|
           File::Stat.stubs(:new).with(file).returns(stat)
@@ -491,6 +491,28 @@ describe FSEvents::Stream do
           Dir.expects(:[]).with("#{path}/*").returns([])
         end
         @stream.update_last_event
+      end
+      
+      it 'should see if there are any subdirectories' do
+        @stats.each { |stat|  stat.expects(:directory?) }
+        @stream.update_last_event
+      end
+      
+      it 'should cache subdirectories' do
+        subdir_path = '/sub/dir/path'
+        @files[3].stubs(:to_s).returns(subdir_path)
+        @stats[3].stubs(:directory?).returns(true)
+        Dir.expects(:[]).with("#{subdir_path}/*").returns([])
+        @stream.update_last_event
+      end
+      
+      it 'should not add cached subdirectories to the watched paths' do
+        subdir_path = '/sub/dir/path'
+        @files[3].stubs(:to_s).returns(subdir_path)
+        @stats[3].stubs(:directory?).returns(true)
+        Dir.stubs(:[]).with("#{subdir_path}/*").returns([])
+        @stream.update_last_event
+        @stream.paths.should_not include(@files[3])
       end
     end
   end

@@ -63,10 +63,13 @@ module FSEvents
       when :mtime
         @last_event = Time.now
       when :cache
-        paths.each do |path|
+        cache_paths = paths.dup
+        cache_paths.each do |path|
           dirs[path] = {}
           Dir["#{path}/*"].each do |file|
-            dirs[path][file] = File::Stat.new(file)
+            stat = File::Stat.new(file)
+            dirs[path][file] = stat
+            cache_paths.push(file) if stat.directory?
           end
         end
       end
