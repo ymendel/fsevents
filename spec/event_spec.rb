@@ -56,49 +56,137 @@ describe FSEvents::Event do
   describe 'listing modified files' do
     before :each do
       @now = Time.now
-      @stream.stubs(:last_event).returns(@now)
-      @files = Array.new(5) do |i|
-        file = stub("file #{i+1}")
-        File.stubs(:mtime).with(file).returns(@now + i - 2)
-        file
-      end
+      @files = Array.new(5) { |i|  stub("file #{i+1}") }
       @event.stubs(:files).returns(@files)
     end
-
-    it 'should get the file list' do
-      @event.expects(:files).returns(@files)
+    
+    it 'should check the stream mode' do
+      @stream.expects(:mode)
       @event.modified_files
     end
-
-    it 'should get the last event time from the stream' do
-      @stream.expects(:last_event).returns(@now)
-      @event.modified_files
-    end
-
-    it 'should return files modified after the last event time' do
-      expected_files = @files.values_at(3, 4)
-      modified_files = @event.modified_files
-
-      expected_files.each do |file|
-        modified_files.should include(file)
+    
+    describe 'when the stream mode is mtime' do
+      before :each do
+        @stream.stubs(:mode).returns(:mtime)
+      end
+      
+      before :each do
+        @stream.stubs(:last_event).returns(@now)
+        @files.each_with_index do |file, i|
+          File.stubs(:mtime).with(file).returns(@now + i - 2)
+        end
+      end
+      
+      it 'should get the file list' do
+        @event.expects(:files).returns(@files)
+        @event.modified_files
+      end
+      
+      it 'should get the last event time from the stream' do
+        @stream.expects(:last_event).returns(@now)
+        @event.modified_files
+      end
+      
+      it 'should return files modified after the last event time' do
+        expected_files = @files.values_at(3, 4)
+        modified_files = @event.modified_files
+        
+        expected_files.each do |file|
+          modified_files.should include(file)
+        end
+      end
+      
+      it 'should return files modified at the last event time' do
+        expected_files = @files.values_at(2)
+        modified_files = @event.modified_files
+        
+        expected_files.each do |file|
+          modified_files.should include(file)
+        end
+      end
+      
+      it 'should not return files not modified after the last event time' do
+        unexpected_files = @files.values_at(0, 1)
+        modified_files = @event.modified_files
+        
+        unexpected_files.each do |file|
+          modified_files.should_not include(file)
+        end
       end
     end
-
-    it 'should return files modified at the last event time' do
-      expected_files = @files.values_at(2)
-      modified_files = @event.modified_files
-
-      expected_files.each do |file|
-        modified_files.should include(file)
+    
+    describe 'when the stream mode is cache' do
+      before :each do
+        @stream.stubs(:mode).returns(:cache)
       end
-    end
-
-    it 'should not return files not modified after the last event time' do
-      unexpected_files = @files.values_at(0, 1)
-      modified_files = @event.modified_files
-
-      unexpected_files.each do |file|
-        modified_files.should_not include(file)
+      
+      before :each do
+        @dir_cache = { @path => {} }
+        @files.each_with_index do |file, i|
+          size  = 50 * (i + 1)
+          mtime = @now + i - 2
+          File.stubs(:size).with(file).returns(size)
+          File.stubs(:mtime).with(file).returns(mtime)
+          stat = stub("file #{i+1} stat", :mtime => mtime, :size => size)
+          @dir_cache[@path][file] = stat
+        end
+        @stream.stubs(:dirs).returns(@dir_cache)
+      end
+      
+      it 'should get the file list' do
+        @event.expects(:files).returns(@files)
+        @event.modified_files
+      end
+      
+      it 'should get the stream dir cache' do
+        @stream.expects(:dirs).returns(@dir_cache)
+        @event.modified_files
+      end
+      
+      it 'should get the dir cache for the event path' do
+        sub_cache = @dir_cache[@path]
+        @dir_cache.expects(:[]).with(@path).returns(sub_cache)
+        @event.modified_files
+      end
+      
+      it 'should return files that do not appear in the cache' do
+        expected_files = Array.new(2) { |i|  stub("new file #{i+1}") }
+        expected_files.each { |file|  @files.push(file) }
+        modified_files = @event.modified_files
+        
+        expected_files.each do |file|
+          modified_files.should include(file)
+        end
+      end
+      
+      it 'should return files with sizes that differ from the cache' do
+        @dir_cache[@path][@files[3]].stubs(:size).returns(3)
+        @dir_cache[@path][@files[4]].stubs(:size).returns(101)
+        expected_files = @files.values_at(3, 4)
+        modified_files = @event.modified_files
+        
+        expected_files.each do |file|
+          modified_files.should include(file)
+        end
+      end
+      
+      it 'should return files with mtimes that differ from the cache' do
+        @dir_cache[@path][@files[2]].stubs(:mtime).returns(@now - 234)
+        expected_files = @files.values_at(2)
+        modified_files = @event.modified_files
+        
+        expected_files.each do |file|
+          modified_files.should include(file)
+        end
+      end
+      
+      it 'should not return files not modified from the cache' do
+        unexpected_files = @files.values_at(0, 1)
+        modified_files = @event.modified_files
+        
+        unexpected_files.each do |file|
+          modified_files.should_not include(file)
+        end
       end
     end
   end

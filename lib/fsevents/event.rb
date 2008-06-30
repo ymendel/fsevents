@@ -13,7 +13,21 @@ module FSEvents
     end
     
     def modified_files
-      files.select { |f|  File.mtime(f) >= stream.last_event }
+      case stream.mode
+      when :mtime
+        files.select { |f|  File.mtime(f) >= stream.last_event }
+      when :cache
+        cache = stream.dirs[path]
+        
+        files.select do |f|
+          cached = cache[f]
+          
+          cached.nil? or
+          
+          File.mtime(f) != cached.mtime or
+          File.size(f)  != cached.size
+        end
+      end
     end
   end
 end
