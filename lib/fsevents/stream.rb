@@ -2,10 +2,12 @@ require 'fsevents/event'
 
 module FSEvents
   class Stream
-    attr_reader :stream, :last_event
+    attr_reader :stream, :mode, :last_event
     attr_reader :allocator, :context, :paths, :since, :latency, :flags, :callback
     
     class StreamError < StandardError; end
+    
+    MODES = [:mtime, :cache]
     
     def initialize(*paths, &callback)
       raise ArgumentError, 'A callback block is required' if callback.nil?
@@ -13,6 +15,9 @@ module FSEvents
       
       options = {}
       options = paths.pop if paths.last.is_a?(Hash)
+      
+      @mode = options[:mode] || :mtime
+      raise ArgumentError, "Mode '#{mode}' unknown" unless MODES.include?(@mode)
       
       paths = Dir.pwd if paths.empty?
       

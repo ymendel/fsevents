@@ -50,6 +50,7 @@ describe FSEvents::Stream do
         [:allocator, :context, :since, :latency, :flags].each do |opt|
           @options[opt] = stub(opt.to_s)
         end
+        @options[:mode] = :cache
         @other_path = '/other/path'
       end
       
@@ -112,6 +113,19 @@ describe FSEvents::Stream do
       it 'should default the flags to 0' do
         @options.delete(:flags)
         FSEvents::Stream.new(@path, @options) {}.flags.should == 0
+      end
+      
+      it 'should store mode' do
+        FSEvents::Stream.new(@path, @options) {}.mode.should == @options[:mode]
+      end
+      
+      it 'should default mode to mtime' do
+        @options.delete(:mode)
+        FSEvents::Stream.new(@path, @options) {}.mode.should == :mtime
+      end
+      
+      it 'should not accept any mode other than mtime or cache' do
+        lambda { FSEvents::Stream.new(@path, @options.merge(:mode => :something_else)) {} }.should raise_error(ArgumentError)
       end
     end
   end
