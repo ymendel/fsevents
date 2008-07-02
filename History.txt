@@ -1,3 +1,8 @@
+== 0.1.1 2008-07-02
+
+* 1 tiny enhancement:
+  * Added ability to get deleted files from an Event (or the entire events array) provided the stream is in cache mode.
+
 == 0.1.0 2008-06-30
 
 * 1 minor enhancement:
