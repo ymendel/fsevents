@@ -29,5 +29,16 @@ module FSEvents
         end
       end
     end
+    
+    def deleted_files
+      case stream.mode
+      when :mtime
+        raise RuntimeError, 'This mode does not support getting deleted files'
+      when :cache
+        cache = stream.dirs[path] || {}
+        
+        cache.keys - files
+      end
+    end
   end
 end

@@ -204,4 +204,86 @@ describe FSEvents::Event do
       end
     end
   end
+  
+  it 'should list deleted files' do
+    @event.should respond_to(:deleted_files)
+  end
+  
+  describe 'listing deleted files' do
+    it 'should check the stream mode' do
+      @stream.expects(:mode)
+      @event.deleted_files
+    end
+    
+    describe 'when the stream mode is mtime' do
+      before :each do
+        @stream.stubs(:mode).returns(:mtime)
+      end
+      
+      it 'should error' do
+        lambda { @event.deleted_files }.should raise_error(RuntimeError)
+      end
+    end
+    
+    describe 'when the stream mode is cache' do
+      before :each do
+        @stream.stubs(:mode).returns(:cache)
+      end
+      
+      before :each do
+        @now = Time.now
+        @files = Array.new(5) { |i|  stub("file #{i+1}") }
+        @event.stubs(:files).returns(@files)
+        
+        @dir_cache = { @path => {} }
+        @files.each_with_index do |file, i|
+          size  = 50 * (i + 1)
+          mtime = @now + i - 2
+          stat = stub("file #{i+1} stat", :mtime => mtime, :size => size)
+          @dir_cache[@path][file] = stat
+        end
+        @stream.stubs(:dirs).returns(@dir_cache)
+      end
+      
+      it 'should get the file list' do
+        @event.expects(:files).returns(@files)
+        @event.deleted_files
+      end
+      
+      it 'should get the stream dir cache' do
+        @stream.expects(:dirs).returns(@dir_cache)
+        @event.deleted_files
+      end
+      
+      it 'should get the dir cache for the event path' do
+        sub_cache = @dir_cache[@path]
+        @dir_cache.expects(:[]).with(@path).returns(sub_cache)
+        @event.deleted_files
+      end
+      
+      it 'should return files from the cache that are missing from the file list' do
+        expected_files = Array.new(2) { |i|  stub("new file #{i+1}") }
+        expected_files.each { |file|  @dir_cache[@path][file] = stub('stat') }
+        deleted_files = @event.deleted_files
+        
+        expected_files.each do |file|
+          deleted_files.should include(file)
+        end
+      end
+      
+      it 'should not return files from that cache that are present in the file list' do
+        unexpected_files = @files
+        deleted_files = @event.deleted_files
+        
+        unexpected_files.each do |file|
+          deleted_files.should_not include(file)
+        end
+      end
+      
+      it 'should handle this path not yet cached' do
+        @dir_cache.delete(@path)
+        @event.deleted_files.should == []
+      end
+    end
+  end
 end
