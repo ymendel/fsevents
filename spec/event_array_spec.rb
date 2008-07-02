@@ -39,4 +39,21 @@ describe EventArray do
       @event_array.modified_files.should == files
     end
   end
+  
+  it 'should return deleted files' do
+    @event_array.should respond_to(:deleted_files)
+  end
+  
+  describe 'returning deleted files' do
+    it 'should collect deleted files from its events' do
+      events = Array.new(3) { stub('event', :deleted_files => Array.new(3) { stub('file') }) }
+      files = []
+      events.each do |event|
+        @event_array << event
+        files += event.deleted_files
+      end
+      
+      @event_array.deleted_files.should == files
+    end
+  end
 end
